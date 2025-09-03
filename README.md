@@ -29,20 +29,21 @@ This repo contains a simple Python script (`image-analysis.py`) that uses Azure 
    ```
 
 ## Usage
-Run the script with a local image path as the first argument:
+1. Specify features in `visual_features`
+2. Run the script with a local image path as the first argument:
 
 ```bash
-python image-analysis.py img/street.jpg
+python image-analysis.py img/image.jpg
 ```
 
 What it does:
 - Loads your Azure Vision endpoint/key from `.env`
-- Sends the image for analysis (captions, dense captions, tags, objects, people)
+- Sends the image for analysis (text, captions, tags, objects, people)
 - Prints results to the terminal
 - If any people are detected (confidence > 0.2), saves an annotated image to `img/results/people.jpg`
 
 ## Output
-- Console output: Caption, dense captions, tags, and objects with confidences
+- Console output: text, caption, dense captions, tags, and objects with confidences
 - Annotated image: If people detected, saved to `img/results/people.jpg` (directory created if missing)
 
 ## Troubleshooting
@@ -52,6 +53,6 @@ What it does:
 - Matplotlib backend issues in headless terminals: The script uses `pyplot` only to save figures; this typically works without a display. If you hit backend errors, set `MPLBACKEND=Agg` in your environment.
 
 ## Notes
-- To use all Azure Vision features (including CAPTION, DENSE_CAPTIONS) select Western Europe as Region in you project.
-- The script currently requests CAPTION, DENSE_CAPTIONS, TAGS, OBJECTS, and PEOPLE features by defaults.
+- To use all Azure Vision features (i.e. captions) select Northern or Western Europe as Region in you project as some feature are region locked.
+- The script currently requests TEXT, CAPTION, DENSE_CAPTIONS, TAGS, OBJECTS, and PEOPLE features by defaults.
 - People boxes are drawn in cyan and saved only when at least one person is detected.

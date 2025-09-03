@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.core.credentials import AzureKeyCredential
+from utils import show_people, annotate_words, annotate_lines
 
 def main():
     os.system('cls' if os.name=='nt' else 'clear')
@@ -16,7 +17,13 @@ def main():
         ai_endpoint = os.getenv('VISION_ENDPOINT')
         ai_key = os.getenv('VISION_KEY')
 
-        image_file = image_file = sys.argv[1]            
+        if not ai_endpoint or not ai_key:
+            raise ValueError("Missing VISION_ENDPOINT or VISION_KEY environment variables. Check your .env file.")
+
+        # Validate CLI args
+        if len(sys.argv) < 2:
+            raise ValueError("Usage: python image-analysis.py <path-to-image>")
+        image_file = sys.argv[1]
 
         if not os.path.exists(image_file):
             print(f"File not found: {image_file}")
@@ -34,10 +41,11 @@ def main():
             image_data=image_data,
             visual_features=[
                 VisualFeatures.CAPTION,
-                VisualFeatures.DENSE_CAPTIONS,
-                VisualFeatures.TAGS,
-                VisualFeatures.OBJECTS,
-                VisualFeatures.PEOPLE
+                # VisualFeatures.DENSE_CAPTIONS,
+                # VisualFeatures.READ,
+                # VisualFeatures.TAGS,
+                # VisualFeatures.OBJECTS,
+                # VisualFeatures.PEOPLE
             ],
         )
 
@@ -51,6 +59,21 @@ def main():
             for caption in result.dense_captions.list:
                 print(" Caption: '{}' (confidence: {:.2f}%)".format(caption.text, caption.confidence * 100))
         
+        # Get Image text
+        if result.read is not None:
+            print("\nText:")
+            
+            for line in result.read.blocks[0].lines:
+                print(f" {line.text}")
+            annotate_lines(image_file, result.read)
+            
+            # Find individual words in each line
+            print ("\nIndividual words:")
+            for line in result.read.blocks[0].lines:
+                for word in line.words:
+                    print(f"  {word.text} (Confidence: {word.confidence:.2f}%)")
+            # Annotate the words in the image
+            annotate_words(image_file, result.read)
 
         # Get image tags
         if result.tags is not None:
@@ -64,9 +87,8 @@ def main():
             for detected_object in result.objects.list:
                 print(" {} (confidence: {:.2f}%)".format(detected_object.tags[0].name, detected_object.tags[0].confidence * 100))
 
-
         # Get people in the image
-        if len(result.people.list) > 0:
+        if result.people is not None and len(result.people.list) > 0:
             print("\nPeople in image:")
 
             for detected_person in result.people.list:
@@ -76,59 +98,6 @@ def main():
   
     except Exception as ex:
         print(ex)
-
-
-def show_objects(image_filename, detected_objects):
-    print ("\nAnnotating objects...")
-
-    # Prepare image for drawing
-    image = Image.open(image_filename)
-    fig = plt.figure(figsize=(image.width/100, image.height/100))
-    plt.axis('off')
-    draw = ImageDraw.Draw(image)
-    color = 'cyan'
-
-    for detected_object in detected_objects:
-        # Draw object bounding box
-        r = detected_object.bounding_box
-        bounding_box = ((r.x, r.y), (r.x + r.width, r.y + r.height)) 
-        draw.rectangle(bounding_box, outline=color, width=3)
-        plt.annotate(detected_object.tags[0].name,(r.x, r.y), backgroundcolor=color)
-
-    # Save annotated image
-    plt.imshow(image)
-    plt.tight_layout(pad=0)
-    objectfile = 'objects.jpg'
-    fig.savefig(objectfile)
-    print('  Results saved in', objectfile)
-
-
-def show_people(image_filename, detected_people):
-    print ("\nAnnotating objects...")
-
-    # Prepare image for drawing
-    image = Image.open(image_filename)
-    fig = plt.figure(figsize=(image.width/100, image.height/100))
-    plt.axis('off')
-    draw = ImageDraw.Draw(image)
-    color = 'cyan'
-
-    for detected_person in detected_people:
-        if detected_person.confidence > 0.2:
-            # Draw object bounding box
-            r = detected_person.bounding_box
-            bounding_box = ((r.x, r.y), (r.x + r.width, r.y + r.height))
-            draw.rectangle(bounding_box, outline=color, width=3)
-
-    # Save annotated image
-    plt.imshow(image)
-    plt.tight_layout(pad=0)
-    output_dir = os.path.join('img', 'results')
-    os.makedirs(output_dir, exist_ok=True)
-    peoplefile = os.path.join(output_dir, 'people.jpg')
-    fig.savefig(peoplefile)
-    print('  Results saved in', peoplefile)
-
 
 if __name__ == "__main__":
     main()
