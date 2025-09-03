@@ -1,0 +1,10 @@
+.env
+
+/img/*
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+
+.DS_Store
