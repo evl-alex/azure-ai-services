@@ -3,9 +3,6 @@ import os
 from PIL import Image, ImageDraw
 import sys
 from matplotlib import pyplot as plt
-from azure.core.exceptions import HttpResponseError
-import requests
-
 
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
@@ -25,13 +22,10 @@ def main():
             print(f"File not found: {image_file}")
             exit(2)
 
-        # Authenticate Azure AI Vision client
         cv_client = ImageAnalysisClient(
             endpoint=ai_endpoint,
             credential=AzureKeyCredential(ai_key))
 
-
-        # Analyze image
         with open(image_file, "rb") as f:
             image_data = f.read()
         print(f'\nAnalyzing {image_file} ...\n')
