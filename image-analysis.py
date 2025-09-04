@@ -1,9 +1,6 @@
 from dotenv import load_dotenv
 import os
-from PIL import Image, ImageDraw
 import sys
-from matplotlib import pyplot as plt
-
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.core.credentials import AzureKeyCredential
@@ -14,11 +11,11 @@ def main():
 
     try:
         load_dotenv()
-        ai_endpoint = os.getenv('VISION_ENDPOINT')
-        ai_key = os.getenv('VISION_KEY')
+        endpoint = os.getenv('VISION_ENDPOINT')
+        key = os.getenv('VISION_KEY')
 
-        if not ai_endpoint or not ai_key:
-            raise ValueError("Missing VISION_ENDPOINT or VISION_KEY environment variables. Check your .env file.")
+        if not endpoint or not key:
+            raise ValueError("Missing ENDPOINT or KEY environment variables. Check your .env file.")
 
         # Validate CLI args
         if len(sys.argv) < 2:
@@ -30,22 +27,23 @@ def main():
             exit(2)
 
         cv_client = ImageAnalysisClient(
-            endpoint=ai_endpoint,
-            credential=AzureKeyCredential(ai_key))
+            endpoint=endpoint,
+            credential=AzureKeyCredential(key))
 
         with open(image_file, "rb") as f:
             image_data = f.read()
+
         print(f'\nAnalyzing {image_file} ...\n')
 
         result = cv_client.analyze(
             image_data=image_data,
             visual_features=[
                 VisualFeatures.CAPTION,
-                # VisualFeatures.DENSE_CAPTIONS,
-                # VisualFeatures.READ,
-                # VisualFeatures.TAGS,
-                # VisualFeatures.OBJECTS,
-                # VisualFeatures.PEOPLE
+                VisualFeatures.DENSE_CAPTIONS,
+                VisualFeatures.READ,
+                VisualFeatures.TAGS,
+                VisualFeatures.OBJECTS,
+                VisualFeatures.PEOPLE
             ],
         )
 
