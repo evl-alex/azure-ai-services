@@ -4,8 +4,8 @@ from .annotate_lines import annotate_lines
 from .annotate_faces import annotate_faces
 
 __all__ = [
-	"show_people",
-	"annotate_words",
-	"annotate_lines",
-	"annotate_faces",
+    "show_people",
+    "annotate_words",
+    "annotate_lines",
+    "annotate_faces",
 ]
