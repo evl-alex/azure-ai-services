@@ -8,5 +8,6 @@ __pycache__/
 *.png
 *.gif
 *.bmp
+*.mp4
 
 .DS_Store
